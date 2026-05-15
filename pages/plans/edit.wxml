@@ -1,0 +1,158 @@
+<view class="container">
+  <!-- 基本信息 -->
+  <view class="card">
+    <view class="card-title">基本信息</view>
+
+    <view class="form-item" wx:if="{{type === 'custom'}}">
+      <text class="form-label">计划名称</text>
+      <input
+        class="form-input"
+        placeholder="输入计划名称"
+        value="{{form.name}}"
+        bindinput="onNameInput"
+        maxlength="20"
+      />
+    </view>
+    <view class="form-item" wx:else>
+      <text class="form-label">计划名称</text>
+      <text class="form-value">{{form.name}}</text>
+    </view>
+
+    <!-- 封面样式 -->
+    <view class="form-item">
+      <text class="form-label">封面样式</text>
+      <view class="cover-preview" style="background-color: {{form.color}};">
+        <image wx:if="{{form.coverImage}}" class="cover-image" src="{{form.coverImage}}" mode="aspectFill"></image>
+        <text wx:else class="cover-emoji">{{form.emoji}}</text>
+      </view>
+      <view class="cover-actions">
+        <button class="mini-btn" bindtap="chooseImage">选择图片</button>
+        <button class="mini-btn mini-btn-light" wx:if="{{form.coverImage}}" bindtap="clearCover">清除图片</button>
+      </view>
+    </view>
+
+    <!-- 颜色选择 -->
+    <view class="form-item">
+      <text class="form-label">主题色</text>
+      <view class="color-picker">
+        <view
+          class="color-dot {{form.color === '#ff6b6b' ? 'active' : ''}}"
+          style="background: #ff6b6b"
+          data-color="#ff6b6b"
+          bindtap="selectColor"
+        ></view>
+        <view
+          class="color-dot {{form.color === '#4ecdc4' ? 'active' : ''}}"
+          style="background: #4ecdc4"
+          data-color="#4ecdc4"
+          bindtap="selectColor"
+        ></view>
+        <view
+          class="color-dot {{form.color === '#45b7d1' ? 'active' : ''}}"
+          style="background: #45b7d1"
+          data-color="#45b7d1"
+          bindtap="selectColor"
+        ></view>
+        <view
+          class="color-dot {{form.color === '#f39c12' ? 'active' : ''}}"
+          style="background: #f39c12"
+          data-color="#f39c12"
+          bindtap="selectColor"
+        ></view>
+        <view
+          class="color-dot {{form.color === '#9b59b6' ? 'active' : ''}}"
+          style="background: #9b59b6"
+          data-color="#9b59b6"
+          bindtap="selectColor"
+        ></view>
+        <view
+          class="color-dot {{form.color === '#2ecc71' ? 'active' : ''}}"
+          style="background: #2ecc71"
+          data-color="#2ecc71"
+          bindtap="selectColor"
+        ></view>
+      </view>
+    </view>
+
+    <!-- Emoji 选择 -->
+    <view class="form-item">
+      <text class="form-label">图标</text>
+      <view class="emoji-picker">
+        <view
+          class="emoji-item {{form.emoji === '💪' ? 'active' : ''}}"
+          data-emoji="💪"
+          bindtap="selectEmoji"
+        >💪</view>
+        <view
+          class="emoji-item {{form.emoji === '🧗' ? 'active' : ''}}"
+          data-emoji="🧗"
+          bindtap="selectEmoji"
+        >🧗</view>
+        <view
+          class="emoji-item {{form.emoji === '🦵' ? 'active' : ''}}"
+          data-emoji="🦵"
+          bindtap="selectEmoji"
+        >🦵</view>
+        <view
+          class="emoji-item {{form.emoji === '🏋️' ? 'active' : ''}}"
+          data-emoji="🏋️"
+          bindtap="selectEmoji"
+        >🏋️</view>
+        <view
+          class="emoji-item {{form.emoji === '🧘' ? 'active' : ''}}"
+          data-emoji="🧘"
+          bindtap="selectEmoji"
+        >🧘</view>
+        <view
+          class="emoji-item {{form.emoji === '🏃' ? 'active' : ''}}"
+          data-emoji="🏃"
+          bindtap="selectEmoji"
+        >🏃</view>
+        <view
+          class="emoji-item {{form.emoji === '🤸' ? 'active' : ''}}"
+          data-emoji="🤸"
+          bindtap="selectEmoji"
+        >🤸</view>
+        <view
+          class="emoji-item {{form.emoji === '🚴' ? 'active' : ''}}"
+          data-emoji="🚴"
+          bindtap="selectEmoji"
+        >🚴</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 锻炼参数 -->
+  <view class="card">
+    <view class="card-title">锻炼参数</view>
+    <view class="form-item">
+      <text class="form-label">每日组数</text>
+      <view class="stepper">
+        <view class="step-btn" bindtap="decreaseGroups">−</view>
+        <text class="value">{{form.groupsPerDay}}</text>
+        <view class="step-btn" bindtap="increaseGroups">+</view>
+      </view>
+    </view>
+    <view class="form-item">
+      <text class="form-label">每组个数</text>
+      <view class="stepper">
+        <view class="step-btn" bindtap="decreaseReps">−</view>
+        <text class="value">{{form.repsPerGroup}}</text>
+        <view class="step-btn" bindtap="increaseReps">+</view>
+      </view>
+    </view>
+    <view class="form-item">
+      <text class="form-label">组间休息(秒)</text>
+      <view class="stepper">
+        <view class="step-btn" bindtap="decreaseRest">−</view>
+        <text class="value">{{form.restSeconds}}</text>
+        <view class="step-btn" bindtap="increaseRest">+</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 保存按钮 -->
+  <button class="btn-save" bindtap="save" disabled="{{saving}}">
+    {{saving ? '保存中...' : '保存计划'}}
+  </button>
+</view>

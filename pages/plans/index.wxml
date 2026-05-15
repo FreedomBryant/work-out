@@ -1,0 +1,66 @@
+<view class="container">
+  <view class="header">
+    <text class="header-title">我的计划</text>
+    <view class="btn-add" bindtap="addPlan">
+      <text class="btn-add-icon">+</text>
+      <text class="btn-add-text">新建计划</text>
+    </view>
+  </view>
+
+  <view class="plan-list">
+    <view
+      class="plan-card"
+      wx:for="{{plans}}"
+      wx:key="id"
+      data-planid="{{item.id}}"
+      bindtap="startWorkout"
+    >
+      <view class="plan-cover" style="background-color: {{item.color || '#ff6b6b'}};">
+        <text class="plan-emoji">{{item.emoji || '💪'}}</text>
+        <view class="plan-type-tag" wx:if="{{item.type === 'preset'}}">预置</view>
+      </view>
+
+      <view class="plan-info">
+        <text class="plan-name">{{item.name}}</text>
+        <view class="plan-stats">
+          <text class="plan-stat">{{item.groupsPerDay}} 组/日</text>
+          <text class="plan-stat">{{item.repsPerGroup}} 个/组</text>
+        </view>
+        <view class="plan-progress" wx:if="{{todayData[item.id]}}">
+          <text class="plan-progress-text">
+            今日进度: {{todayData[item.id].done}} / {{todayData[item.id].total}} 组
+          </text>
+          <view class="plan-progress-bar">
+            <view
+              class="plan-progress-fill"
+              style="width: {{todayData[item.id].total > 0 ? (todayData[item.id].done / todayData[item.id].total * 100) : 0}}%"
+            ></view>
+          </view>
+        </view>
+      </view>
+
+      <view class="plan-actions">
+        <view
+          class="plan-action-btn edit-btn"
+          catchtap="editPlan"
+          data-planid="{{item.id}}"
+          hover-class="btn-hover"
+        >编辑</view>
+        <view
+          wx:if="{{item.type !== 'preset'}}"
+          class="plan-action-btn delete-btn"
+          catchtap="deletePlan"
+          data-planid="{{item.id}}"
+          data-name="{{item.name}}"
+          hover-class="btn-hover"
+        >删除</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{plans.length === 0}}">
+    <text class="empty-icon">🏋️</text>
+    <text class="empty-text">还没有计划</text>
+    <text class="empty-hint">点击上方按钮创建一个吧</text>
+  </view>
+</view>

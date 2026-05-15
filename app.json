@@ -1,0 +1,41 @@
+{
+  "pages": [
+    "pages/plans/index",
+    "pages/workout/index",
+    "pages/history/index",
+    "pages/settings/index",
+    "pages/plans/edit"
+  ],
+  "window": {
+    "navigationBarTitleText": "我的锻炼",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f5f5f5"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#ff6b6b",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/plans/index",
+        "text": "计划",
+        "iconPath": "images/tab/plans.png",
+        "selectedIconPath": "images/tab/plans-sel.png"
+      },
+      {
+        "pagePath": "pages/history/index",
+        "text": "历史",
+        "iconPath": "images/tab/history.png",
+        "selectedIconPath": "images/tab/history-sel.png"
+      },
+      {
+        "pagePath": "pages/settings/index",
+        "text": "设置",
+        "iconPath": "images/tab/settings.png",
+        "selectedIconPath": "images/tab/settings-sel.png"
+      }
+    ]
+  }
+}

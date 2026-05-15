@@ -1,0 +1,4 @@
+node_modules/
+.unzip/
+*.log
+.DS_Store

@@ -1,0 +1,26 @@
+<view class="container">
+  <!-- 反馈设置 -->
+  <view class="card">
+    <view class="card-title">反馈设置</view>
+    <view class="setting-item">
+      <text class="label">🔊 声音提示</text>
+      <switch checked="{{settings.soundEnabled}}" bindchange="toggleSound" color="#ff6b6b"/>
+    </view>
+    <view class="setting-item">
+      <text class="label">📳 震动提示</text>
+      <switch checked="{{settings.vibrationEnabled}}" bindchange="toggleVibration" color="#ff6b6b"/>
+    </view>
+  </view>
+
+  <!-- 数据管理 -->
+  <view class="card">
+    <view class="card-title">数据管理</view>
+    <view class="setting-item">
+      <text class="label">📊 历史记录数</text>
+      <text class="value-text">{{recordCount}} 条</text>
+    </view>
+    <view class="btn-row">
+      <button class="btn-danger" bindtap="clearAllHistory">清空所有历史记录</button>
+    </view>
+  </view>
+</view>
