@@ -203,6 +203,36 @@ function saveSettings(settings) {
   wx.setStorageSync(STORAGE_KEYS.SETTINGS, settings)
 }
 
+function updateTodayRecord(record) {
+  ensureMigrated()
+  const today = new Date()
+  const dateStr = today.getFullYear() + '-'
+    + String(today.getMonth() + 1).padStart(2, '0') + '-'
+    + String(today.getDate()).padStart(2, '0')
+
+  const records = wx.getStorageSync(STORAGE_KEYS.RECORDS) || []
+  const idx = records.findIndex(r => r.date === dateStr && r.planId === record.planId)
+
+  if (idx >= 0) {
+    // 更新今日记录
+    records[idx].groupsComplete = record.groupsComplete
+    records[idx].totalReps = record.totalReps
+    records[idx].finishTime = record.finishTime
+    records[idx].planName = record.planName
+    records[idx].repsPerGroup = record.repsPerGroup
+    records[idx].completedGroups = record.completedGroups
+  } else {
+    // 新建今日记录
+    records.push({
+      ...record,
+      date: dateStr,
+      planId: record.planId || 'pushups',
+      planName: record.planName || '俯卧撑'
+    })
+  }
+  wx.setStorageSync(STORAGE_KEYS.RECORDS, records)
+}
+
 module.exports = {
   getPlans,
   getPlan,
@@ -211,6 +241,7 @@ module.exports = {
   generateId,
   getRecords,
   addRecord,
+  updateTodayRecord,
   clearRecords,
   getTodayRecords,
   getSettings,

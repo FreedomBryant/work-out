@@ -1,4 +1,4 @@
-const { getSettings, addRecord, getPlan } = require('../../utils/storage')
+const { getSettings, updateTodayRecord, getPlan, getTodayRecords } = require('../../utils/storage')
 const { playRestEnd, playWorkoutComplete } = require('../../utils/voice')
 
 Page({
@@ -35,6 +35,9 @@ Page({
     })
 
     wx.setKeepScreenOn({ keepScreenOn: true })
+
+    // 检查是否有未完成的今日记录，尝试恢复进度
+    this.tryRestoreProgress(plan)
   },
 
   onUnload() {
@@ -52,6 +55,63 @@ Page({
       this.clearRestTimer()
       this.startRestTimer()
     }
+  },
+
+  // 尝试恢复未完成的进度
+  tryRestoreProgress(plan) {
+    const { planId, totalGroups } = this.data
+    const todayRecords = getTodayRecords(planId)
+    if (todayRecords.length === 0) return
+
+    const lastRecord = todayRecords[todayRecords.length - 1]
+    const savedGroups = lastRecord.completedGroups
+    const savedCount = lastRecord.groupsComplete
+
+    // 未达标（有已完成的组，但未达目标）
+    if (savedCount > 0 && savedCount < totalGroups) {
+      // 如果 completedGroups 数组是空（旧数据），从 groupsComplete 重建
+      const groups = (Array.isArray(savedGroups) && savedGroups.length > 0)
+        ? savedGroups
+        : Array.from({ length: savedCount }, (_, i) => i + 1)
+
+      wx.showModal({
+        title: '发现上次未完成的锻炼',
+        content: `已完成 ${savedCount} 组，是否继续？`,
+        cancelText: '重新开始',
+        confirmText: '继续锻炼',
+        success: (res) => {
+          if (res.confirm) {
+            // 继续上次进度
+            this.setData({
+              phase: 'ready',
+              currentGroup: groups[groups.length - 1] + 1,
+              completedGroups: groups,
+              progressPercent: (savedCount / totalGroups) * 100
+            })
+          } else {
+            // 重新开始：清除今日记录
+            this.clearTodayProgress(planId)
+            this.setData({
+              phase: 'ready',
+              currentGroup: 1,
+              completedGroups: [],
+              progressPercent: 0
+            })
+          }
+        }
+      })
+    }
+  },
+
+  // 清除今日记录的已保存进度
+  clearTodayProgress(planId) {
+    const records = wx.getStorageSync('records') || []
+    const today = new Date()
+    const dateStr = today.getFullYear() + '-'
+      + String(today.getMonth() + 1).padStart(2, '0') + '-'
+      + String(today.getDate()).padStart(2, '0')
+    const filtered = records.filter(r => !(r.date === dateStr && r.planId === planId))
+    wx.setStorageSync('records', filtered)
   },
 
   // 震动反馈
@@ -94,6 +154,9 @@ Page({
     const { currentGroup, totalGroups, completedGroups } = this.data
     const newCompleted = [...completedGroups, currentGroup]
 
+    // 每完成一组立即保存进度（传入最新的组号数组，避免读到 this.data 中旧值）
+    this.saveRecord(newCompleted.length, newCompleted)
+
     if (currentGroup >= totalGroups) {
       // 所有组完成
       this.setData({
@@ -101,7 +164,6 @@ Page({
         completedGroups: newCompleted,
         progressPercent: 100
       })
-      this.saveRecord(newCompleted.length)
       this.clearRestTimer()
       this.tryVibrate('heavy')
       this.tryPlaySound('complete')
@@ -146,17 +208,18 @@ Page({
     }
   },
 
-  // 保存记录
-  saveRecord(groupsComplete) {
+  // 保存/更新今日记录（upsert，每天每计划一条）
+  saveRecord(groupsComplete, completedGroupsArr) {
     const { totalGroups, repsPerGroup, planId, planName } = this.data
+    const groups = completedGroupsArr || this.data.completedGroups
     const now = new Date()
     const dateStr = this.formatDate(now)
     const timeStr = this.formatTime(now)
-    addRecord({
-      date: dateStr,
+    updateTodayRecord({
       planId: planId,
       planName: planName,
       groupsComplete: groupsComplete,
+      completedGroups: groups,
       repsPerGroup: repsPerGroup,
       totalReps: groupsComplete * repsPerGroup,
       finishTime: `${dateStr} ${timeStr}`
@@ -190,13 +253,7 @@ Page({
         ? `已完成 ${completedGroups.length} 组，已保存记录`
         : '本次未完成任何组',
       success: () => {
-        this.setData({
-          phase: 'ready',
-          currentGroup: 1,
-          restCountdown: 0,
-          progressPercent: 0,
-          completedGroups: []
-        })
+        wx.switchTab({ url: '/pages/plans/index' })
       }
     })
   },
