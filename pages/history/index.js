@@ -49,7 +49,7 @@ Page({
     this.filterRecords(planid)
   },
 
-  drawChart() {
+  drawChart(retryCount = 0) {
     const { records } = this.data
     if (!records || records.length === 0) return
 
@@ -57,7 +57,14 @@ Page({
     query.select('#chart-canvas')
       .fields({ node: true, size: true })
       .exec((res) => {
-        if (!res || !res[0]) return
+        if (!res || !res[0]) {
+          // 真机上手机会在 setData 后异步渲染 wx:else 块的 canvas 节点，
+          // 此时节点可能尚未就绪，延迟重试（最多 3 次）
+          if (retryCount < 3) {
+            setTimeout(() => this.drawChart(retryCount + 1), 200)
+          }
+          return
+        }
         const canvas = res[0].node
         const ctx = canvas.getContext('2d')
         const dpr = wx.getSystemInfoSync().pixelRatio
