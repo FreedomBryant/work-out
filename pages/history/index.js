@@ -143,7 +143,7 @@ Page({
       ctx.fillStyle = gradient
 
       ctx.beginPath()
-      ctx.roundRect(x, y, barWidth, barH, [4, 4, 0, 0])
+      drawRoundRect(ctx, x, y, barWidth, barH, [4, 4, 0, 0])
       ctx.fill()
 
       // 数值标签
@@ -195,4 +195,28 @@ function formatDate(date) {
   const m = String(date.getMonth() + 1).padStart(2, '0')
   const d = String(date.getDate()).padStart(2, '0')
   return `${y}-${m}-${d}`
+}
+
+/**
+ * 绘制圆角矩形路径
+ * 兼容不支持 roundRect 的 XWeb 引擎（微信真机）
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} x
+ * @param {number} y
+ * @param {number} w
+ * @param {number} h
+ * @param {[number,number,number,number]} radii 四个角半径：[tl, tr, br, bl]
+ */
+function drawRoundRect(ctx, x, y, w, h, radii) {
+  const [tl, tr, br, bl] = radii
+  ctx.moveTo(x + tl, y)
+  ctx.lineTo(x + w - tr, y)
+  ctx.quadraticCurveTo(x + w, y, x + w, y + tr)
+  ctx.lineTo(x + w, y + h - br)
+  ctx.quadraticCurveTo(x + w, y + h, x + w - br, y + h)
+  ctx.lineTo(x + bl, y + h)
+  ctx.quadraticCurveTo(x, y + h, x, y + h - bl)
+  ctx.lineTo(x, y + tl)
+  ctx.quadraticCurveTo(x, y, x + tl, y)
+  ctx.closePath()
 }
