@@ -34,7 +34,14 @@
           <view class="chart-tab {{chartMode === 'year' ? 'active' : ''}}" data-mode="year" bindtap="switchChartMode">年</view>
         </view>
       </view>
-      <view class="chart-summary">共完成 <text class="chart-summary-num">{{chartTotal}}</text> 组锻炼</view>
+      <view class="chart-summary">
+        <view class="chart-summary-item" wx:for="{{exerciseTotals}}" wx:key="name">
+          <text class="summary-emoji">{{item.emoji}}</text>
+          <text class="summary-name">{{item.name}}</text>
+          <text class="summary-num">{{item.totalReps}}</text>
+          <text class="summary-unit">个</text>
+        </view>
+      </view>
       <canvas type="2d" id="chart-canvas" class="chart-canvas"></canvas>
     </view>
 

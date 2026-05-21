@@ -9,7 +9,8 @@ Page({
     chartReady: false,
     chartMode: 'week',
     chartTitle: '📊 近7天锻炼统计',
-    chartTotal: 0
+    chartTotal: 0,
+    exerciseTotals: []
   },
 
   onLoad() {
@@ -70,6 +71,23 @@ Page({
     // 计算当前模式的总计
     const { total } = computeChartData(records, chartMode)
     this.setData({ chartTotal: total })
+
+    // 计算各动作总个数
+    const plans = this.data.plans || []
+    const planMap = {}
+    plans.forEach(p => { planMap[p.name] = p })
+    const exerciseMap = {}
+    records.forEach(r => {
+      const name = r.planName || '未知'
+      exerciseMap[name] = (exerciseMap[name] || 0) + r.totalReps
+    })
+    const exerciseTotals = Object.entries(exerciseMap)
+      .map(([name, totalReps]) => {
+        const plan = planMap[name] || {}
+        return { name, totalReps, emoji: plan.emoji || '', color: plan.color || '#999' }
+      })
+      .sort((a, b) => b.totalReps - a.totalReps)
+    this.setData({ exerciseTotals })
 
     const query = wx.createSelectorQuery()
     query.select('#chart-canvas')

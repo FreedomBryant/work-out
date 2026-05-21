@@ -97,16 +97,40 @@
 }
 
 .chart-summary {
-  font-size: 28rpx;
-  color: #888;
-  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
   margin-bottom: 20rpx;
 }
 
-.chart-summary-num {
+.chart-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.summary-emoji {
+  font-size: 30rpx;
+  width: 40rpx;
+  text-align: center;
+}
+
+.summary-name {
+  color: #666;
+  width: 100rpx;
+}
+
+.summary-num {
   font-size: 34rpx;
   font-weight: bold;
   color: #ff6b6b;
+}
+
+.summary-unit {
+  font-size: 24rpx;
+  color: #999;
 }
 
 .chart-canvas {
