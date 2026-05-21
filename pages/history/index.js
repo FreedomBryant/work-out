@@ -8,7 +8,8 @@ Page({
     currentPlanId: '',
     chartReady: false,
     chartMode: 'week',
-    chartTitle: '📊 近7天锻炼统计'
+    chartTitle: '📊 近7天锻炼统计',
+    chartTotal: 0
   },
 
   onLoad() {
@@ -63,8 +64,12 @@ Page({
   },
 
   drawChart(retryCount = 0) {
-    const { records } = this.data
+    const { records, chartMode } = this.data
     if (!records || records.length === 0) return
+
+    // 计算当前模式的总计
+    const { total } = computeChartData(records, chartMode)
+    this.setData({ chartTotal: total })
 
     const query = wx.createSelectorQuery()
     query.select('#chart-canvas')
@@ -246,7 +251,7 @@ function computeChartData(records, mode) {
       labels.push(dateStr.slice(5)) // MM-DD
       values.push(dailyMap[dateStr] || 0)
     }
-    return { labels, values }
+    return { labels, values, total: values.reduce((a, b) => a + b, 0) }
   }
 
   if (mode === 'month') {
@@ -259,7 +264,7 @@ function computeChartData(records, mode) {
       labels.push(dateStr.slice(5)) // MM-DD
       values.push(dailyMap[dateStr] || 0)
     }
-    return { labels, values }
+    return { labels, values, total: values.reduce((a, b) => a + b, 0) }
   }
 
   // year: 按月度汇总
@@ -277,5 +282,5 @@ function computeChartData(records, mode) {
     labels.push(monthStr.slice(5) + '月') // MM月
     values.push(monthMap[monthStr] || 0)
   }
-  return { labels, values }
+  return { labels, values, total: values.reduce((a, b) => a + b, 0) }
 }

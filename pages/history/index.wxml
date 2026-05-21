@@ -34,6 +34,7 @@
           <view class="chart-tab {{chartMode === 'year' ? 'active' : ''}}" data-mode="year" bindtap="switchChartMode">年</view>
         </view>
       </view>
+      <view class="chart-summary">共完成 <text class="chart-summary-num">{{chartTotal}}</text> 组锻炼</view>
       <canvas type="2d" id="chart-canvas" class="chart-canvas"></canvas>
     </view>
 
