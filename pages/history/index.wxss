@@ -63,11 +63,37 @@
   margin-bottom: 30rpx;
 }
 
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
 .chart-title {
   font-size: 30rpx;
   font-weight: bold;
   color: #333;
-  margin-bottom: 20rpx;
+}
+
+.chart-tabs {
+  display: flex;
+  background: #f5f5f5;
+  border-radius: 10rpx;
+  overflow: hidden;
+}
+
+.chart-tab {
+  padding: 8rpx 24rpx;
+  font-size: 26rpx;
+  color: #999;
+  transition: all 0.2s;
+}
+
+.chart-tab.active {
+  background: #ff6b6b;
+  color: #fff;
+  font-weight: bold;
 }
 
 .chart-canvas {

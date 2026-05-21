@@ -6,7 +6,9 @@ Page({
     records: [],
     plans: [],
     currentPlanId: '',
-    chartReady: false
+    chartReady: false,
+    chartMode: 'week',
+    chartTitle: '📊 近7天锻炼统计'
   },
 
   onLoad() {
@@ -49,6 +51,17 @@ Page({
     this.filterRecords(planid)
   },
 
+  switchChartMode(e) {
+    const mode = e.currentTarget.dataset.mode
+    const titles = {
+      week: '📊 近7天锻炼统计',
+      month: '📊 近30天锻炼统计',
+      year: '📊 近12个月锻炼统计'
+    }
+    this.setData({ chartMode: mode, chartTitle: titles[mode] })
+    this.drawChart()
+  },
+
   drawChart(retryCount = 0) {
     const { records } = this.data
     if (!records || records.length === 0) return
@@ -81,33 +94,17 @@ Page({
   },
 
   renderChart(ctx, width, height) {
-    const records = this.data.records
+    const { records, chartMode } = this.data
 
-    // 按日期汇总每天总个数
-    const dailyMap = {}
-    records.forEach(r => {
-      const day = r.date
-      dailyMap[day] = (dailyMap[day] || 0) + r.totalReps
-    })
-
-    // 获取近7天数据（含今天）
-    const today = new Date()
-    const labels = []
-    const values = []
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(today)
-      d.setDate(d.getDate() - i)
-      const dateStr = formatDate(d)
-      labels.push(dateStr.slice(5)) // MM-DD
-      values.push(dailyMap[dateStr] || 0)
-    }
+    // 根据模式计算数据
+    const { labels, values } = computeChartData(records, chartMode)
 
     const maxVal = Math.max(...values, 1)
     const padding = { top: 20, right: 20, bottom: 50, left: 40 }
     const chartW = width - padding.left - padding.right
     const chartH = height - padding.top - padding.bottom
-    const barGap = 8
-    const barCount = 7
+    const barCount = values.length
+    const barGap = barCount > 20 ? 3 : barCount > 12 ? 5 : 8
     const totalGap = barGap * (barCount - 1)
     const barWidth = (chartW - totalGap) / barCount
 
@@ -146,7 +143,7 @@ Page({
       drawRoundRect(ctx, x, y, barWidth, barH, [4, 4, 0, 0])
       ctx.fill()
 
-      // 数值标签
+      // 数值标签（柱子上方）
       if (val > 0) {
         ctx.fillStyle = '#666'
         ctx.font = '11px sans-serif'
@@ -160,6 +157,8 @@ Page({
     ctx.font = '11px sans-serif'
     ctx.textAlign = 'center'
     labels.forEach((label, i) => {
+      // 月模式30根柱子，标签太多，隔5个显示一个
+      if (chartMode === 'month' && i % 5 !== 0) return
       const x = padding.left + i * (barWidth + barGap) + barWidth / 2
       ctx.fillText(label, x, height - padding.bottom + 20)
     })
@@ -219,4 +218,64 @@ function drawRoundRect(ctx, x, y, w, h, radii) {
   ctx.lineTo(x, y + tl)
   ctx.quadraticCurveTo(x, y, x + tl, y)
   ctx.closePath()
+}
+
+/**
+ * 根据模式计算图表数据
+ * @param {Array} records 记录列表
+ * @param {'week'|'month'|'year'} mode 模式
+ * @returns {{ labels: string[], values: number[] }}
+ */
+function computeChartData(records, mode) {
+  // 按日期汇总每天总个数
+  const dailyMap = {}
+  records.forEach(r => {
+    const day = r.date
+    dailyMap[day] = (dailyMap[day] || 0) + r.totalReps
+  })
+
+  const today = new Date()
+
+  if (mode === 'week') {
+    const labels = []
+    const values = []
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today)
+      d.setDate(d.getDate() - i)
+      const dateStr = formatDate(d)
+      labels.push(dateStr.slice(5)) // MM-DD
+      values.push(dailyMap[dateStr] || 0)
+    }
+    return { labels, values }
+  }
+
+  if (mode === 'month') {
+    const labels = []
+    const values = []
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today)
+      d.setDate(d.getDate() - i)
+      const dateStr = formatDate(d)
+      labels.push(dateStr.slice(5)) // MM-DD
+      values.push(dailyMap[dateStr] || 0)
+    }
+    return { labels, values }
+  }
+
+  // year: 按月度汇总
+  const monthMap = {}
+  records.forEach(r => {
+    const month = r.date.slice(0, 7) // YYYY-MM
+    monthMap[month] = (monthMap[month] || 0) + r.totalReps
+  })
+
+  const labels = []
+  const values = []
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1)
+    const monthStr = formatDate(d).slice(0, 7) // YYYY-MM
+    labels.push(monthStr.slice(5) + '月') // MM月
+    values.push(monthMap[monthStr] || 0)
+  }
+  return { labels, values }
 }

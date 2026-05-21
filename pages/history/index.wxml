@@ -26,7 +26,14 @@
   <view wx:else>
     <!-- 统计图表 -->
     <view class="chart-card">
-      <view class="chart-title">📊 近7天锻炼统计</view>
+      <view class="chart-header">
+        <view class="chart-title">{{chartTitle}}</view>
+        <view class="chart-tabs">
+          <view class="chart-tab {{chartMode === 'week' ? 'active' : ''}}" data-mode="week" bindtap="switchChartMode">周</view>
+          <view class="chart-tab {{chartMode === 'month' ? 'active' : ''}}" data-mode="month" bindtap="switchChartMode">月</view>
+          <view class="chart-tab {{chartMode === 'year' ? 'active' : ''}}" data-mode="year" bindtap="switchChartMode">年</view>
+        </view>
+      </view>
       <canvas type="2d" id="chart-canvas" class="chart-canvas"></canvas>
     </view>
 
