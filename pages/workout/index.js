@@ -7,57 +7,78 @@ Page({
     planName: '',
     emoji: '💪',
     planColor: '#ff6b6b',
-    phase: 'ready',          // ready | working | resting | finished
+    exerciseType: 'reps',        // reps | timed
+    phase: 'ready',              // ready | working | resting | finished
+    // reps 模式
     currentGroup: 1,
     totalGroups: 5,
     repsPerGroup: 20,
     restCountdown: 0,
     restSeconds: 60,
     progressPercent: 0,
-    completedGroups: []
+    completedGroups: [],
+    // timed 模式（平板支撑）
+    targetDuration: 120,
+    elapsedSeconds: 0,
+    startTime: 0
   },
 
   restTimer: null,
+  plankTimer: null,
 
   onLoad(options) {
     const planId = (options && options.planId) || 'pushups'
     const plan = getPlan(planId) || {}
-    
-    this.setData({
+    const exerciseType = plan.exerciseType || 'reps'
+
+    const data = {
       planId: planId,
       planName: plan.name || '俯卧撑',
       emoji: plan.emoji || '💪',
       planColor: plan.color || '#ff6b6b',
-      totalGroups: plan.groupsPerDay || 5,
-      repsPerGroup: plan.repsPerGroup || 20,
-      restSeconds: plan.restSeconds || 60,
+      exerciseType: exerciseType,
       progressPercent: 0
-    })
+    }
+
+    if (exerciseType === 'timed') {
+      data.targetDuration = plan.targetDuration || 120
+      data.elapsedSeconds = 0
+    } else {
+      data.totalGroups = plan.groupsPerDay || 5
+      data.repsPerGroup = plan.repsPerGroup || 20
+      data.restSeconds = plan.restSeconds || 60
+    }
+
+    this.setData(data)
 
     wx.setKeepScreenOn({ keepScreenOn: true })
 
-    // 检查是否有未完成的今日记录，尝试恢复进度
-    this.tryRestoreProgress(plan)
+    // 仅 reps 模式需要恢复进度
+    if (exerciseType !== 'timed') {
+      this.tryRestoreProgress(plan)
+    }
   },
 
   onUnload() {
     this.clearRestTimer()
+    this.clearPlankTimer()
   },
 
   onHide() {
     this.clearRestTimer()
+    this.clearPlankTimer()
   },
 
   onShow() {
-    const { phase, restSeconds } = this.data
-    if (phase === 'resting') {
+    const { phase, restSeconds, exerciseType } = this.data
+    if (exerciseType !== 'timed' && phase === 'resting') {
       this.setData({ restCountdown: restSeconds })
       this.clearRestTimer()
       this.startRestTimer()
     }
   },
 
-  // 尝试恢复未完成的进度
+  // 尝试恢复未完成的进度（仅 reps 模式）
   tryRestoreProgress(plan) {
     const { planId, totalGroups } = this.data
     const todayRecords = getTodayRecords(planId)
@@ -134,6 +155,8 @@ Page({
     }
   },
 
+  // ==================== reps 模式 ====================
+
   // 开始一组
   startGroup() {
     const { phase, currentGroup } = this.data
@@ -208,7 +231,63 @@ Page({
     }
   },
 
-  // 保存/更新今日记录（upsert，每天每计划一条）
+  // ==================== timed 模式（平板支撑） ====================
+
+  // 开始计时
+  startPlank() {
+    this.setData({
+      phase: 'working',
+      elapsedSeconds: 0,
+      startTime: Date.now()
+    })
+    this.startPlankTimer()
+  },
+
+  startPlankTimer() {
+    this.clearPlankTimer()
+    this.plankTimer = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - this.data.startTime) / 1000)
+      this.setData({ elapsedSeconds: elapsed })
+    }, 200)
+  },
+
+  clearPlankTimer() {
+    if (this.plankTimer) {
+      clearInterval(this.plankTimer)
+      this.plankTimer = null
+    }
+  },
+
+  // 完成平板支撑
+  stopPlank() {
+    this.clearPlankTimer()
+    const duration = this.data.elapsedSeconds
+    this.savePlankRecord(duration)
+    this.tryVibrate('heavy')
+    this.tryPlaySound('complete')
+    this.setData({ phase: 'finished' })
+  },
+
+  savePlankRecord(duration) {
+    const { planId, planName, targetDuration } = this.data
+    const now = new Date()
+    const dateStr = this.formatDate(now)
+    const timeStr = this.formatTime(now)
+    updateTodayRecord({
+      planId: planId,
+      planName: planName,
+      exerciseType: 'timed',
+      groupsComplete: 1,
+      totalReps: duration,
+      duration: duration,
+      targetDuration: targetDuration,
+      finishTime: `${dateStr} ${timeStr}`
+    })
+  },
+
+  // ==================== 通用 ====================
+
+  // 保存/更新今日记录（reps 模式，upsert，每天每计划一条）
   saveRecord(groupsComplete, completedGroupsArr) {
     const { totalGroups, repsPerGroup, planId, planName } = this.data
     const groups = completedGroupsArr || this.data.completedGroups
@@ -218,6 +297,7 @@ Page({
     updateTodayRecord({
       planId: planId,
       planName: planName,
+      exerciseType: 'reps',
       groupsComplete: groupsComplete,
       completedGroups: groups,
       repsPerGroup: repsPerGroup,
@@ -239,23 +319,46 @@ Page({
     return `${h}:${m}`
   },
 
+  formatDuration(seconds) {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0')
+  },
+
   // 主动结束锻炼
   endWorkout() {
     this.clearRestTimer()
-    const { phase, completedGroups } = this.data
+    this.clearPlankTimer()
+    const { phase, completedGroups, exerciseType, elapsedSeconds, planId } = this.data
     if (phase === 'finished') return
-    if (completedGroups.length > 0) {
-      this.saveRecord(completedGroups.length)
-    }
-    wx.showModal({
-      title: '锻炼结束',
-      content: completedGroups.length > 0
-        ? `已完成 ${completedGroups.length} 组，已保存记录`
-        : '本次未完成任何组',
-      success: () => {
-        wx.switchTab({ url: '/pages/plans/index' })
+
+    if (exerciseType === 'timed') {
+      if (elapsedSeconds > 0) {
+        this.savePlankRecord(elapsedSeconds)
       }
-    })
+      wx.showModal({
+        title: '锻炼结束',
+        content: elapsedSeconds > 0
+          ? `已坚持 ${elapsedSeconds} 秒，已保存记录`
+          : '本次未完成锻炼',
+        success: () => {
+          wx.switchTab({ url: '/pages/plans/index' })
+        }
+      })
+    } else {
+      if (completedGroups.length > 0) {
+        this.saveRecord(completedGroups.length)
+      }
+      wx.showModal({
+        title: '锻炼结束',
+        content: completedGroups.length > 0
+          ? `已完成 ${completedGroups.length} 组，已保存记录`
+          : '本次未完成任何组',
+        success: () => {
+          wx.switchTab({ url: '/pages/plans/index' })
+        }
+      })
+    }
   },
 
   // 返回计划列表

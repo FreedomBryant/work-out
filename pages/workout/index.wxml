@@ -11,67 +11,119 @@
     </view>
   </view>
 
-  <!-- 进度信息 -->
-  <view class="progress-card">
-    <view class="progress-title">第 {{currentGroup}} / {{totalGroups}} 组</view>
-    <view class="progress-bar">
-      <view class="progress-fill" style="width: {{progressPercent}}%"></view>
-    </view>
-  </view>
-
-  <!-- 状态显示 -->
-  <view class="status-card">
-    <view wx:if="{{phase === 'working'}}" class="status working">
-      <text class="status-icon">💪</text>
-      <text class="status-text">正在锻炼... 加油！</text>
-    </view>
-    <view wx:elif="{{phase === 'resting'}}" class="status resting">
-      <text class="status-icon">⏳</text>
-      <text class="status-text">组间休息</text>
-      <text class="countdown">{{restCountdown}}s</text>
-    </view>
-    <view wx:elif="{{phase === 'finished'}}" class="status finished">
-      <text class="status-icon">🎉</text>
-      <text class="status-text">全部完成！</text>
-    </view>
-    <view wx:else class="status ready">
-      <text class="status-icon">🏋️</text>
-      <text class="status-text">准备好了吗？</text>
-    </view>
-  </view>
-
-  <!-- 按钮区 -->
-  <view class="action-area">
-    <button
-      wx:if="{{phase === 'working'}}"
-      class="btn-action btn-complete"
-      bindtap="completeGroup"
-    >完成本组 ✓</button>
-
-    <button
-      wx:elif="{{phase === 'finished'}}"
-      class="btn-action"
-      bindtap="goBack"
-    >返回计划列表</button>
-
-    <button
-      wx:else
-      class="btn-action"
-      bindtap="startGroup"
-    >
-      {{phase === 'resting' ? '跳过休息 →' : '开始锻炼'}}
-    </button>
-  </view>
-
-  <!-- 本次已完成组数 -->
-  <view class="summary" wx:if="{{completedGroups.length > 0}}">
-    <text class="summary-title">本日完成</text>
-    <view class="group-list">
-      <view class="group-item" wx:for="{{completedGroups}}" wx:key="index">
-        第 {{item}} 组 ✓
+  <!-- ======== reps 模式（原有） ======== -->
+  <block wx:if="{{exerciseType === 'reps'}}">
+    <!-- 进度信息 -->
+    <view class="progress-card">
+      <view class="progress-title">第 {{currentGroup}} / {{totalGroups}} 组</view>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{progressPercent}}%"></view>
       </view>
     </view>
-  </view>
+
+    <!-- 状态显示 -->
+    <view class="status-card">
+      <view wx:if="{{phase === 'working'}}" class="status working">
+        <text class="status-icon">💪</text>
+        <text class="status-text">正在锻炼... 加油！</text>
+      </view>
+      <view wx:elif="{{phase === 'resting'}}" class="status resting">
+        <text class="status-icon">⏳</text>
+        <text class="status-text">组间休息</text>
+        <text class="countdown">{{restCountdown}}s</text>
+      </view>
+      <view wx:elif="{{phase === 'finished'}}" class="status finished">
+        <text class="status-icon">🎉</text>
+        <text class="status-text">全部完成！</text>
+      </view>
+      <view wx:else class="status ready">
+        <text class="status-icon">🏋️</text>
+        <text class="status-text">准备好了吗？</text>
+      </view>
+    </view>
+
+    <!-- 按钮区 -->
+    <view class="action-area">
+      <button
+        wx:if="{{phase === 'working'}}"
+        class="btn-action btn-complete"
+        bindtap="completeGroup"
+      >完成本组 ✓</button>
+
+      <button
+        wx:elif="{{phase === 'finished'}}"
+        class="btn-action"
+        bindtap="goBack"
+      >返回计划列表</button>
+
+      <button
+        wx:else
+        class="btn-action"
+        bindtap="startGroup"
+      >
+        {{phase === 'resting' ? '跳过休息 →' : '开始锻炼'}}
+      </button>
+    </view>
+
+    <!-- 本次已完成组数 -->
+    <view class="summary" wx:if="{{completedGroups.length > 0}}">
+      <text class="summary-title">本日完成</text>
+      <view class="group-list">
+        <view class="group-item" wx:for="{{completedGroups}}" wx:key="index">
+          第 {{item}} 组 ✓
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ======== timed 模式（平板支撑） ======== -->
+  <block wx:elif="{{exerciseType === 'timed'}}">
+    <view class="plank-card">
+      <view class="plank-emoji">🧘</view>
+      <view class="plank-timer-display">{{formatDuration(elapsedSeconds)}}</view>
+      <view class="plank-target">目标时长: {{formatDuration(targetDuration)}}</view>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{targetDuration > 0 ? Math.min(elapsedSeconds / targetDuration * 100, 100) : 0}}%"></view>
+      </view>
+    </view>
+
+    <view class="plank-status">
+      <view wx:if="{{phase === 'ready'}}" class="status">
+        <text class="status-icon">🧘</text>
+        <text class="status-text">准备好，点击下方按钮开始</text>
+        <text class="plank-tip">坚持越久越好！</text>
+      </view>
+      <view wx:elif="{{phase === 'working'}}" class="status">
+        <text class="status-icon">⏱️</text>
+        <text class="status-text">坚持住！</text>
+      </view>
+      <view wx:elif="{{phase === 'finished'}}" class="status">
+        <text class="status-icon">🎉</text>
+        <text class="status-text">太棒了！</text>
+        <text class="plank-result">坚持了 {{formatDuration(elapsedSeconds)}}</text>
+      </view>
+    </view>
+
+    <view class="action-area">
+      <button
+        wx:if="{{phase === 'ready'}}"
+        class="btn-action"
+        bindtap="startPlank"
+      >开始平板支撑</button>
+
+      <button
+        wx:elif="{{phase === 'working'}}"
+        class="btn-action btn-stop"
+        bindtap="stopPlank"
+      >完成 ✓</button>
+
+      <button
+        wx:elif="{{phase === 'finished'}}"
+        class="btn-action"
+        bindtap="goBack"
+      >返回计划列表</button>
+    </view>
+  </block>
 
   <!-- 结束按钮 -->
   <button wx:if="{{phase !== 'finished'}}" class="btn-end" bindtap="endWorkout">结束锻炼</button>

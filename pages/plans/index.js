@@ -19,10 +19,18 @@ Page({
     const todayData = {}
     plans.forEach(p => {
       const records = getTodayRecords(p.id)
-      const totalGroups = records.reduce((sum, r) => sum + r.groupsComplete, 0)
-      todayData[p.id] = {
-        done: totalGroups,
-        total: p.groupsPerDay
+      if (p.exerciseType === 'timed') {
+        const totalDuration = records.reduce((sum, r) => sum + (r.duration || r.totalReps || 0), 0)
+        todayData[p.id] = {
+          done: totalDuration,
+          total: p.targetDuration || 120
+        }
+      } else {
+        const totalGroups = records.reduce((sum, r) => sum + r.groupsComplete, 0)
+        todayData[p.id] = {
+          done: totalGroups,
+          total: p.groupsPerDay
+        }
       }
     })
     this.setData({ plans, todayData })

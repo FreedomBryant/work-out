@@ -39,7 +39,7 @@
           <text class="summary-emoji">{{item.emoji}}</text>
           <text class="summary-name">{{item.name}}</text>
           <text class="summary-num">{{item.totalReps}}</text>
-          <text class="summary-unit">个</text>
+          <text class="summary-unit">{{item.unit}}</text>
         </view>
       </view>
       <canvas type="2d" id="chart-canvas" class="chart-canvas"></canvas>
@@ -53,20 +53,34 @@
           <text class="record-time">{{item.finishTime}}</text>
           <text class="record-plan">{{item.planName}}</text>
         </view>
-        <view class="record-stats">
-          <view class="stat">
-            <text class="stat-value">{{item.groupsComplete}}</text>
-            <text class="stat-label">完成组数</text>
+        <block wx:if="{{item.exerciseType === 'timed'}}">
+          <view class="record-stats">
+            <view class="stat">
+              <text class="stat-value">{{item.duration || item.totalReps || 0}}</text>
+              <text class="stat-label">坚持时长（秒）</text>
+            </view>
+            <view class="stat">
+              <text class="stat-value">{{item.targetDuration || '-'}}</text>
+              <text class="stat-label">目标时长</text>
+            </view>
           </view>
-          <view class="stat">
-            <text class="stat-value">{{item.repsPerGroup}}</text>
-            <text class="stat-label">每组个数</text>
+        </block>
+        <block wx:else>
+          <view class="record-stats">
+            <view class="stat">
+              <text class="stat-value">{{item.groupsComplete}}</text>
+              <text class="stat-label">完成组数</text>
+            </view>
+            <view class="stat">
+              <text class="stat-value">{{item.repsPerGroup}}</text>
+              <text class="stat-label">每组个数</text>
+            </view>
+            <view class="stat">
+              <text class="stat-value">{{item.totalReps}}</text>
+              <text class="stat-label">总个数</text>
+            </view>
           </view>
-          <view class="stat">
-            <text class="stat-value">{{item.totalReps}}</text>
-            <text class="stat-label">总个数</text>
-          </view>
-        </view>
+        </block>
       </view>
     </view>
 

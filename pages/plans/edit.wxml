@@ -125,30 +125,42 @@
   <!-- 锻炼参数 -->
   <view class="card">
     <view class="card-title">锻炼参数</view>
-    <view class="form-item">
-      <text class="form-label">每日组数</text>
-      <view class="stepper">
-        <view class="step-btn" bindtap="decreaseGroups">−</view>
-        <text class="value">{{form.groupsPerDay}}</text>
-        <view class="step-btn" bindtap="increaseGroups">+</view>
+    <block wx:if="{{exerciseType === 'timed'}}">
+      <view class="form-item">
+        <text class="form-label">目标时长(秒)</text>
+        <view class="stepper">
+          <view class="step-btn" bindtap="decreaseTargetDuration">−</view>
+          <text class="value">{{form.targetDuration}}</text>
+          <view class="step-btn" bindtap="increaseTargetDuration">+</view>
+        </view>
       </view>
-    </view>
-    <view class="form-item">
-      <text class="form-label">每组个数</text>
-      <view class="stepper">
-        <view class="step-btn" bindtap="decreaseReps">−</view>
-        <text class="value">{{form.repsPerGroup}}</text>
-        <view class="step-btn" bindtap="increaseReps">+</view>
+    </block>
+    <block wx:else>
+      <view class="form-item">
+        <text class="form-label">每日组数</text>
+        <view class="stepper">
+          <view class="step-btn" bindtap="decreaseGroups">−</view>
+          <text class="value">{{form.groupsPerDay}}</text>
+          <view class="step-btn" bindtap="increaseGroups">+</view>
+        </view>
       </view>
-    </view>
-    <view class="form-item">
-      <text class="form-label">组间休息(秒)</text>
-      <view class="stepper">
-        <view class="step-btn" bindtap="decreaseRest">−</view>
-        <text class="value">{{form.restSeconds}}</text>
-        <view class="step-btn" bindtap="increaseRest">+</view>
+      <view class="form-item">
+        <text class="form-label">每组个数</text>
+        <view class="stepper">
+          <view class="step-btn" bindtap="decreaseReps">−</view>
+          <text class="value">{{form.repsPerGroup}}</text>
+          <view class="step-btn" bindtap="increaseReps">+</view>
+        </view>
       </view>
-    </view>
+      <view class="form-item">
+        <text class="form-label">组间休息(秒)</text>
+        <view class="stepper">
+          <view class="step-btn" bindtap="decreaseRest">−</view>
+          <text class="value">{{form.restSeconds}}</text>
+          <view class="step-btn" bindtap="increaseRest">+</view>
+        </view>
+      </view>
+    </block>
   </view>
 
   <!-- 保存按钮 -->

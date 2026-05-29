@@ -23,13 +23,25 @@
       <view class="plan-info">
         <text class="plan-name">{{item.name}}</text>
         <view class="plan-stats">
-          <text class="plan-stat">{{item.groupsPerDay}} 组/日</text>
-          <text class="plan-stat">{{item.repsPerGroup}} 个/组</text>
+          <block wx:if="{{item.exerciseType === 'timed'}}">
+            <text class="plan-stat">目标 {{item.targetDuration}} 秒</text>
+          </block>
+          <block wx:else>
+            <text class="plan-stat">{{item.groupsPerDay}} 组/日</text>
+            <text class="plan-stat">{{item.repsPerGroup}} 个/组</text>
+          </block>
         </view>
         <view class="plan-progress" wx:if="{{todayData[item.id]}}">
-          <text class="plan-progress-text">
-            今日进度: {{todayData[item.id].done}} / {{todayData[item.id].total}} 组
-          </text>
+          <block wx:if="{{item.exerciseType === 'timed'}}">
+            <text class="plan-progress-text">
+              今日进度: {{todayData[item.id].done}} 秒
+            </text>
+          </block>
+          <block wx:else>
+            <text class="plan-progress-text">
+              今日进度: {{todayData[item.id].done}} / {{todayData[item.id].total}} 组
+            </text>
+          </block>
           <view class="plan-progress-bar">
             <view
               class="plan-progress-fill"

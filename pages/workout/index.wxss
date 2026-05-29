@@ -165,3 +165,64 @@
   border: none !important;
   text-decoration: underline;
 }
+
+/* ======== timed 模式（平板支撑） ======== */
+.plank-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 60rpx 40rpx;
+  width: 100%;
+  margin-bottom: 30rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 30rpx rgba(155, 89, 182, 0.1);
+}
+
+.plank-emoji {
+  font-size: 80rpx;
+  margin-bottom: 24rpx;
+}
+
+.plank-timer-display {
+  font-size: 100rpx;
+  font-weight: bold;
+  color: #9b59b6;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 4rpx;
+  margin-bottom: 16rpx;
+}
+
+.plank-target {
+  font-size: 28rpx;
+  color: #aaa;
+  margin-bottom: 30rpx;
+}
+
+.plank-card .progress-bar {
+  margin-top: 0;
+}
+
+.plank-tip {
+  font-size: 26rpx;
+  color: #aaa;
+  margin-top: 8rpx;
+}
+
+.plank-result {
+  font-size: 36rpx;
+  color: #9b59b6;
+  font-weight: bold;
+  margin-top: 8rpx;
+}
+
+.plank-status {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 60rpx 30rpx;
+  width: 100%;
+  margin-bottom: 30rpx;
+  text-align: center;
+}
+
+.btn-stop {
+  background: linear-gradient(135deg, #9b59b6, #8e44ad) !important;
+}

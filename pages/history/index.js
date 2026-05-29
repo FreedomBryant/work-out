@@ -79,12 +79,17 @@ Page({
     const exerciseMap = {}
     records.forEach(r => {
       const name = r.planName || '未知'
-      exerciseMap[name] = (exerciseMap[name] || 0) + r.totalReps
+      const plan = planMap[name] || {}
+      const isTimed = plan.exerciseType === 'timed' || r.exerciseType === 'timed'
+      // timed 类型用 duration（秒），reps 类型用 totalReps（个）
+      const value = isTimed ? (r.duration || r.totalReps || 0) : r.totalReps
+      exerciseMap[name] = (exerciseMap[name] || 0) + value
     })
     const exerciseTotals = Object.entries(exerciseMap)
       .map(([name, totalReps]) => {
         const plan = planMap[name] || {}
-        return { name, totalReps, emoji: plan.emoji || '', color: plan.color || '#999' }
+        const isTimed = plan.exerciseType === 'timed'
+        return { name, totalReps, emoji: plan.emoji || '', color: plan.color || '#999', unit: isTimed ? '秒' : '个' }
       })
       .sort((a, b) => b.totalReps - a.totalReps)
     this.setData({ exerciseTotals })

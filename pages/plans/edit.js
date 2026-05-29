@@ -24,12 +24,13 @@ Page({
         this.setData({
           isEdit: true,
           planId: plan.id,
-          type: plan.type,
+          exerciseType: plan.exerciseType || 'reps',
           form: {
             name: plan.name,
             groupsPerDay: plan.groupsPerDay,
             repsPerGroup: plan.repsPerGroup,
             restSeconds: plan.restSeconds,
+            targetDuration: plan.targetDuration || 120,
             coverImage: plan.coverImage || '',
             emoji: plan.emoji || '💪',
             color: plan.color || '#ff6b6b'
@@ -62,6 +63,13 @@ Page({
   },
   decreaseRest() {
     this.setData({ 'form.restSeconds': Math.max(this.data.form.restSeconds - 10, 10) })
+  },
+
+  increaseTargetDuration() {
+    this.setData({ 'form.targetDuration': Math.min(this.data.form.targetDuration + 10, 600) })
+  },
+  decreaseTargetDuration() {
+    this.setData({ 'form.targetDuration': Math.max(this.data.form.targetDuration - 10, 10) })
   },
 
   // 可选颜色
@@ -105,7 +113,7 @@ Page({
   },
 
   save() {
-    const { form, isEdit, planId, type } = this.data
+    const { form, isEdit, planId, type, exerciseType } = this.data
     if (!form.name.trim()) {
       wx.showToast({ title: '请输入计划名称', icon: 'none' })
       return
@@ -117,10 +125,12 @@ Page({
       id: isEdit ? planId : generateId(),
       name: form.name.trim(),
       type: isEdit ? type : 'custom',
+      exerciseType: exerciseType || 'reps',
       coverImage: form.coverImage,
       groupsPerDay: form.groupsPerDay,
       repsPerGroup: form.repsPerGroup,
       restSeconds: form.restSeconds,
+      targetDuration: form.targetDuration || 120,
       emoji: form.emoji,
       color: form.color
     }

@@ -16,6 +16,7 @@ const DEFAULT_PLANS = [
     id: 'pushups',
     name: '俯卧撑',
     type: 'preset',
+    exerciseType: 'reps',
     coverImage: '',
     groupsPerDay: 5,
     repsPerGroup: 20,
@@ -28,6 +29,7 @@ const DEFAULT_PLANS = [
     id: 'pullups',
     name: '引体向上',
     type: 'preset',
+    exerciseType: 'reps',
     coverImage: '',
     groupsPerDay: 3,
     repsPerGroup: 8,
@@ -40,6 +42,7 @@ const DEFAULT_PLANS = [
     id: 'squats',
     name: '深蹲',
     type: 'preset',
+    exerciseType: 'reps',
     coverImage: '',
     groupsPerDay: 5,
     repsPerGroup: 30,
@@ -47,6 +50,17 @@ const DEFAULT_PLANS = [
     createdAt: 0,
     emoji: '🦵',
     color: '#45b7d1'
+  },
+  {
+    id: 'plank',
+    name: '平板支撑',
+    type: 'preset',
+    exerciseType: 'timed',
+    coverImage: '',
+    targetDuration: 120,
+    createdAt: 0,
+    emoji: '🧘',
+    color: '#9b59b6'
   }
 ]
 
@@ -75,6 +89,30 @@ function ensureMigrated() {
       }
     }
     wx.setStorageSync(EMOJI_V3_KEY, true)
+  }
+
+  // v4：添加平板支撑预置计划（给已有用户追加）
+  const PLANK_V4_KEY = 'data_plank_v4'
+  if (!wx.getStorageSync(PLANK_V4_KEY)) {
+    const storedPlans = wx.getStorageSync(STORAGE_KEYS.PLANS)
+    if (Array.isArray(storedPlans)) {
+      const hasPlank = storedPlans.some(p => p.id === 'plank')
+      if (!hasPlank) {
+        storedPlans.push({
+          id: 'plank',
+          name: '平板支撑',
+          type: 'preset',
+          exerciseType: 'timed',
+          coverImage: '',
+          targetDuration: 120,
+          createdAt: Date.now(),
+          emoji: '🧘',
+          color: '#9b59b6'
+        })
+        wx.setStorageSync(STORAGE_KEYS.PLANS, storedPlans)
+      }
+    }
+    wx.setStorageSync(PLANK_V4_KEY, true)
   }
 
   if (wx.getStorageSync(STORAGE_KEYS.MIGRATED)) return
@@ -221,6 +259,8 @@ function updateTodayRecord(record) {
     records[idx].planName = record.planName
     records[idx].repsPerGroup = record.repsPerGroup
     records[idx].completedGroups = record.completedGroups
+    records[idx].exerciseType = record.exerciseType
+    if (record.duration !== undefined) records[idx].duration = record.duration
   } else {
     // 新建今日记录
     records.push({
