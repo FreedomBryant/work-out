@@ -80,8 +80,8 @@
   <block wx:elif="{{exerciseType === 'timed'}}">
     <view class="plank-card">
       <view class="plank-emoji">🧘</view>
-      <view class="plank-timer-display">{{formatDuration(elapsedSeconds)}}</view>
-      <view class="plank-target">目标时长: {{formatDuration(targetDuration)}}</view>
+      <view class="plank-timer-display">{{timerDisplay}}</view>
+      <view class="plank-target">目标时长: {{targetDisplay}}</view>
       <view class="progress-bar">
         <view class="progress-fill" style="width: {{targetDuration > 0 ? Math.min(elapsedSeconds / targetDuration * 100, 100) : 0}}%"></view>
       </view>
@@ -100,7 +100,7 @@
       <view wx:elif="{{phase === 'finished'}}" class="status">
         <text class="status-icon">🎉</text>
         <text class="status-text">太棒了！</text>
-        <text class="plank-result">坚持了 {{formatDuration(elapsedSeconds)}}</text>
+        <text class="plank-result">坚持了 {{timerDisplay}}</text>
       </view>
     </view>
 

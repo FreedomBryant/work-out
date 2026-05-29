@@ -43,6 +43,8 @@ Page({
     if (exerciseType === 'timed') {
       data.targetDuration = plan.targetDuration || 120
       data.elapsedSeconds = 0
+      data.timerDisplay = this.formatDuration(0)
+      data.targetDisplay = this.formatDuration(data.targetDuration)
     } else {
       data.totalGroups = plan.groupsPerDay || 5
       data.repsPerGroup = plan.repsPerGroup || 20
@@ -71,7 +73,12 @@ Page({
 
   onShow() {
     const { phase, restSeconds, exerciseType } = this.data
-    if (exerciseType !== 'timed' && phase === 'resting') {
+    if (exerciseType === 'timed') {
+      // 如果正在计时中，恢复计时
+      if (phase === 'working' && this.data.startTime > 0) {
+        this.startPlankTimer()
+      }
+    } else if (phase === 'resting') {
       this.setData({ restCountdown: restSeconds })
       this.clearRestTimer()
       this.startRestTimer()
@@ -245,10 +252,15 @@ Page({
 
   startPlankTimer() {
     this.clearPlankTimer()
-    this.plankTimer = setInterval(() => {
+    const tick = () => {
       const elapsed = Math.floor((Date.now() - this.data.startTime) / 1000)
-      this.setData({ elapsedSeconds: elapsed })
-    }, 200)
+      this.setData({
+        elapsedSeconds: elapsed,
+        timerDisplay: this.formatDuration(elapsed)
+      })
+    }
+    tick()
+    this.plankTimer = setInterval(tick, 1000)
   },
 
   clearPlankTimer() {
