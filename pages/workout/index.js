@@ -49,6 +49,9 @@ Page({
       data.totalGroups = plan.groupsPerDay || 5
       data.repsPerGroup = plan.repsPerGroup || 20
       data.restSeconds = plan.restSeconds || 60
+      data.currentGroup = 1
+      data.completedGroups = []
+      data.phase = 'ready'
     }
 
     this.setData(data)
@@ -64,6 +67,7 @@ Page({
   onUnload() {
     this.clearRestTimer()
     this.clearPlankTimer()
+    this.saveProgressOnExit()
   },
 
   onHide() {
@@ -370,6 +374,21 @@ Page({
           wx.switchTab({ url: '/pages/plans/index' })
         }
       })
+    }
+  },
+
+  // 退出时静默保存进度（左滑返回、点返回按钮触发）
+  saveProgressOnExit() {
+    const { phase, completedGroups, exerciseType, elapsedSeconds } = this.data
+    if (phase === 'finished') return
+    if (exerciseType === 'timed') {
+      if (elapsedSeconds > 0) {
+        this.savePlankRecord(elapsedSeconds)
+      }
+    } else {
+      if (completedGroups && completedGroups.length > 0) {
+        this.saveRecord(completedGroups.length)
+      }
     }
   },
 
