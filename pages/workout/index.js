@@ -99,8 +99,22 @@ Page({
     const savedGroups = lastRecord.completedGroups
     const savedCount = lastRecord.groupsComplete
 
+    // 已达标（已完成所有组）
+    if (savedCount >= totalGroups) {
+      const groups = (Array.isArray(savedGroups) && savedGroups.length > 0)
+        ? savedGroups
+        : Array.from({ length: totalGroups }, (_, i) => i + 1)
+      this.setData({
+        phase: 'finished',
+        currentGroup: totalGroups,
+        completedGroups: groups,
+        progressPercent: 100
+      })
+      return
+    }
+
     // 未达标（有已完成的组，但未达目标）
-    if (savedCount > 0 && savedCount < totalGroups) {
+    if (savedCount > 0) {
       // 如果 completedGroups 数组是空（旧数据），从 groupsComplete 重建
       const groups = (Array.isArray(savedGroups) && savedGroups.length > 0)
         ? savedGroups
